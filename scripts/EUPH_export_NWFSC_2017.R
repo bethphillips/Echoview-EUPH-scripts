@@ -11,7 +11,7 @@
 ###############################################
 
 # acoustic variables(s) to integrate and their frequency
-variables <- c("CHU export hz38","CHU export hz120")
+variables <- c("EUPH export 38kHz","EUPH export 120kHz")
 frequency <- c("38","120")
 
 # required packages
@@ -24,7 +24,9 @@ require(stringr)
 BaseYearPath<-"N:/Survey.Acoustics/2017 Hake Sum SH_NP"
 BaseJudgePath<-"N:/Survey.Acoustics/2017 Hake Sum SH_NP/Judging/Euphausiids"
 BaseProjPath<-"N:/Survey.Acoustics/Projects & Analysis/Euphausiids/EUPH"
+#BaseExportPath<-"N:/Survey.Acoustics/2017 Hake Sum SH_NP/Data_SH/Acoustics/Exports_euphausiids/"
 setwd(BaseJudgePath)
+gdepth=1 # depth for grid (e.g. 1 m)
 
 # location of EV files
 
@@ -32,8 +34,15 @@ setwd(BaseJudgePath)
 EUPH_EV <- "EUPH_new_template/Shimada 3 Frequency" # in BaseJudgePath
 
 # Where to put exports
-EUPH_export <- "EUPH_new_template/Exports/CHU" # in BaseJudgePath
-dir.create(file.path(getwd(), EUPH_export))
+EUPH_exportbase <- "Data_SH/Acoustics/Exports_euphausiids/1_NASC_1m" # in BaseYearPath
+date_exportdir<-format(Sys.time(),"%Y%m%d")
+EUPH_export<-file.path(EUPH_exportbase,date_exportdir)
+dir.create(file.path(BaseYearPath, EUPH_export))
+for(v in 1:nrow(vars)){
+  var <- vars$variables[v]
+  dir.create(file.path(BaseYearPath, EUPH_export,var))
+}
+
 
 #list the EV files to integrate
 
@@ -49,7 +58,8 @@ for(f in variables){
 
 # Loop through EV files 
 
-for (i in EVfile.list){
+#for (i in EVfile.list){
+for (i in EVfile.list[1:length(EVfile.list)]){
   # create COM connection between R and Echoview
   EVApp <- COMCreate("EchoviewCom.EvApplication")
   EVApp$Minimize()  #keep window in background
@@ -63,6 +73,7 @@ for (i in EVfile.list){
   EVfile <- EVApp$OpenFile(EVfileNames)
   EVfileName <- file.path(getwd(),EVdir, i)
   print(EVfileName)
+  print(i)
   # Variables object
   Obj <- EVfile[["Variables"]]
   
@@ -79,12 +90,12 @@ for (i in EVfile.list){
     
     # Set analysis grid and exclude lines on Sv data
     Obj_propGrid <- varac[['Properties']][['Grid']]
-    Obj_propGrid$SetDepthRangeGrid(1, 10)
+    Obj_propGrid$SetDepthRangeGrid(1, gdepth)
     Obj_propGrid$SetTimeDistanceGrid(3, 0.5)
  
     
     # export by cells
-    exportcells <- file.path(BaseJudgePath, EUPH_export, var, paste(EvName, freq, "cells.csv", sep="_"))
+    exportcells <- file.path(BaseYearPath, EUPH_export, var, paste(EvName, freq, "cells.csv", sep="_"))
     varac$ExportIntegrationByCellsAll(exportcells)
     
     # Set analysis grid and exclude lines on Sv data back to original values

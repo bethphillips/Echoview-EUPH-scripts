@@ -43,12 +43,12 @@ Tempdir <- "Templates/Shimada"
 
 # Name of the bottom line in original EV files
 EVbottom <- TRUE
-EVbottomname <- "1.0 m bottom offset"
+EVbottomname <- "EV bottom pick to edit"
 
 # Does the new template include a bottom line? What is it's name?
 bottomline <- TRUE
 bottomname <- "EV bottom pick to edit"
-
+#bottomname <- "1.0 m bottom offset"
 
 ###############################################
 
@@ -186,7 +186,9 @@ for (i in EVfile.list){
   
   # Add bottom line and overwrite template bottom line if it exists
   EVfile$Import(bottomfilename)
-  bottom <- linesObj$FindbyName(paste0("Line",linenum+1))
+  #bottom <- linesObj$FindbyName(paste0("Line",linenum+1))
+  #this doesn't work anymore, because it's not coming in as the name of the next line
+  bottom<-linesObj$FindbyName(name)  #Add this instead - looks like the name of the line comes from the filename
   linenum <- linenum + 1
   if(bottomline == TRUE){
     oldbottom <- linesObj$FindbyName(bottomname)
